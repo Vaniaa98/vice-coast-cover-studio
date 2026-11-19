@@ -1,51 +1,38 @@
-// Wires the page: pick a photo, type a caption, export the square cover as a PNG. A `?shot=` query sets up a fixed
-// scene for a screenshot instead (./shots.js).
-import { drawCover } from './cover.js';
+// Vice Coast Cover Studio — boot.
+// Loads the vendored fonts first (the cover is all lettering), then starts
+// the editor. A ?shot= query renders a fixed scene for a screenshot instead.
+
+import { Editor } from './editor.js';
 import { runShot } from './shots.js';
 
-const canvas = document.getElementById('cover');
-const caption = document.getElementById('caption');
-const status = document.getElementById('status');
-let photo = null;
-
-function redraw() {
-  drawCover(canvas, photo, caption.value);
+async function loadFonts() {
+  const faces = [
+    { family: 'Anton', weight: '400' },
+    { family: "'Bebas Neue'", weight: '400' },
+    { family: 'Pacifico', weight: '400' },
+  ];
+  try {
+    await Promise.all(faces.map((f) => document.fonts.load(`${f.weight} 32px ${f.family}`)));
+    await document.fonts.ready;
+  } catch (e) {
+    // Fallback fonts still render; the cover only loses its display faces.
+  }
 }
 
-/** Loads an image from a URL, resolving to the image once it can be drawn. */
-export function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = url;
-  });
-}
+const editor = new Editor(document);
+// Exposed for debugging and for the finalist review's automated checks;
+// the app itself never reads it.
+window.__editor = editor;
+const query = new URLSearchParams(location.search);
+const shot = query.get('shot');
 
-document.getElementById('photo').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  photo = await loadImage(URL.createObjectURL(file));
-  redraw();
+loadFonts().then(async () => {
+  if (shot) {
+    // Editor shots need the live editor (controls, photo library) built
+    // first; runShot then swaps in the fixed shot state and re-renders.
+    await editor.init();
+    await runShot(shot, query, editor);
+  } else {
+    await editor.init();
+  }
 });
-caption.addEventListener('input', redraw);
-document.getElementById('export').addEventListener('click', () => {
-  canvas.toBlob((blob) => {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'cover-1080x1080.png';
-    a.click();
-    status.textContent = 'Saved cover-1080x1080.png';
-  }, 'image/png');
-});
-
-const shot = new URLSearchParams(location.search).get('shot');
-if (shot) {
-  runShot(shot, new URLSearchParams(location.search), async (sample, text) => {
-    photo = await loadImage(sample);
-    caption.value = text;
-    redraw();
-  });
-} else {
-  redraw();
-}

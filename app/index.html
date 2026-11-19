@@ -2,21 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a0a4a'/%3E%3Ccircle cx='16' cy='18' r='8' fill='%23ff9a3d'/%3E%3Crect x='6' y='22' width='20' height='2' fill='%23ff2d78'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice Coast Cover Studio — GTA-style cover art maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<header class="topbar">
+  <div class="brand">
+    <strong>VICE COAST</strong>
+    <span>Cover Studio</span>
+  </div>
+  <p class="tagline">Your photo, your caption — a Vice City poster in four steps.</p>
+  <div class="top-actions">
+    <label class="size-pick">Size
+      <select id="sizeSelect">
+        <option value="1080x1350" selected>Portrait 1080 × 1350</option>
+        <option value="1080x1080">Square 1080 × 1080</option>
+        <option value="1920x1080">Wide 1920 × 1080</option>
+      </select>
+    </label>
+    <button id="expSquare" type="button">PNG 1080×1080</button>
+    <button id="expPortrait" type="button">PNG 1080×1350</button>
+    <button id="expWide" type="button">PNG 1920×1080</button>
+    <button id="expAll" type="button" class="primary">Export all 3 sizes</button>
+  </div>
+</header>
+
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+  <aside class="controls" aria-label="Cover controls">
+    <section>
+      <h2>1 · Photos</h2>
+      <p class="hint">Click a photo to put it in the selected panel, or drag it onto the cover. Drop your own photos below.</p>
+      <div id="photoLib" class="photo-lib" aria-label="Photo library"></div>
+      <label id="dropZone" class="drop-zone">Drop photos here or
+        <input id="fileInput" type="file" accept="image/*" multiple>
+        <span class="browse">browse…</span>
+      </label>
+      <button id="btnFillAll" type="button">Fill all panels from my photos</button>
+    </section>
+
+    <section>
+      <h2>2 · Layout</h2>
+      <div id="layoutList" class="chips" aria-label="Layouts"></div>
+    </section>
+
+    <section>
+      <h2>3 · Grade</h2>
+      <div id="gradeList" class="swatches" aria-label="Colour grades"></div>
+      <label class="check"><input id="optInk" type="checkbox"> Poster ink</label>
+      <label class="check"><input id="optHalftone" type="checkbox"> Halftone title block</label>
+      <label class="check"><input id="optGrain" type="checkbox" checked> Film grain</label>
+    </section>
+
+    <section>
+      <h2>4 · Lettering</h2>
+      <label>Title <input id="inTitle" type="text" maxlength="24" value="VICE COAST"></label>
+      <label>Subtitle <input id="inSubtitle" type="text" maxlength="30" value="Neon Tide"></label>
+      <div id="titleStyleList" class="chips" aria-label="Title styles"></div>
+      <label>Press quote <input id="inQuote" type="text" maxlength="48" value="A FEVER DREAM IN NEON"></label>
+      <label>Quote source <input id="inQuoteSource" type="text" maxlength="30" value="THE COAST HERALD"></label>
+      <label>Tagline <input id="inTagline" type="text" maxlength="48" value="ONE COAST · NO RULES · COMING SOON"></label>
+      <label>Badge word <input id="inBadgeLabel" type="text" maxlength="12" value="WANTED"></label>
+      <label>Volume <input id="inVol" type="text" maxlength="10" value="VOL. 06"></label>
+      <label>Panel captions
+        <select id="captionMode">
+          <option value="place" selected>Place · time · flavour</option>
+          <option value="role">Character roles</option>
+        </select>
+      </label>
+      <div class="checks">
+        <label class="check"><input id="optWanted" type="checkbox" checked> WANTED badge</label>
+        <label class="check"><input id="optSeal" type="checkbox" checked> EST. seal</label>
+        <label class="check"><input id="optRibbon" type="checkbox" checked> Collector's ribbon</label>
+        <label class="check"><input id="optStarburst" type="checkbox" checked> Original starburst</label>
+        <label class="check"><input id="optQuote" type="checkbox" checked> Quote bar</label>
+      </div>
+    </section>
+
+    <section>
+      <h2>5 · Selected panel</h2>
+      <p id="panelLabel" class="hint">Panel 1</p>
+      <label>Place <input id="panelPlace" type="text" maxlength="24"></label>
+      <label>Time <input id="panelTime" type="text" maxlength="12"></label>
+      <label>Flavour <input id="panelFlavor" type="text" maxlength="30"></label>
+      <label>Role <input id="panelRole" type="text" maxlength="24"></label>
+      <label>Zoom <input id="zoomRange" type="range" min="1" max="2.5" step="0.05" value="1"></label>
+      <p class="hint">Drag the photo inside the panel to reposition it; scroll to zoom.</p>
+      <button id="btnResetPanel" type="button">Reset panel crop</button>
+    </section>
+    <p class="fineprint">All art original — no Rockstar Games logo, artwork or fonts. Photos stay on your machine; nothing is uploaded.</p>
+  </aside>
+
+  <section class="stage-wrap">
+    <canvas id="stage" width="1080" height="1350" aria-label="Live cover preview"></canvas>
+    <p id="status" role="status">Loading sample photos…</p>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
