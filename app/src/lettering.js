@@ -253,7 +253,10 @@ export function drawRibbon(ctx, x, y, w, h, text = "COLLECTOR'S EDITION") {
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const size = fitSize(ctx, text, w * 0.86, h * 0.55, "'Bebas Neue'");
+  // Keep the text between the folded ends: each fold triangle reaches
+  // h*0.4 in from its side, and the outline stroke along the fold would
+  // otherwise cross the first and last letters.
+  const size = fitSize(ctx, text, (w - 0.8 * h) * 0.96, h * 0.55, "'Bebas Neue'");
   ctx.font = `${size}px 'Bebas Neue'`;
   ctx.fillText(text, x + w / 2, y + h / 2 + size * 0.05);
   ctx.restore();

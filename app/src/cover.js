@@ -200,9 +200,13 @@ export function renderCover(canvas, state) {
       state.badgeLabel || 'WANTED');
   }
   if (badges.seal !== false) {
-    // On the panel grid's cross junction (0.78W, 0.31H): it overlaps panel
-    // corners, never a caption bar.
-    drawSeal(ctx, 0.78 * W, 0.31 * H, 0.042 * W, '2026');
+    // Just below the panel grid's row junction (0.78W, 0.31H): the seal's
+    // top edge sits 0.01H under the junction, so it never covers a top-row
+    // caption bar (those end at the junction), and its bottom edge stays
+    // above every bottom-row caption bar (those start near 0.62H - barH).
+    // It overlaps photo only, in every layout and at every export size.
+    const sealR = 0.042 * W;
+    drawSeal(ctx, 0.78 * W, 0.31 * H + sealR + 0.01 * H, sealR, '2026');
   }
   if (badges.vol !== false) {
     drawVolTicket(ctx, 0.855 * W, 0.83 * H, 0.115 * W, 0.034 * H, state.vol || 'VOL. 06');
