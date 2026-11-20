@@ -63,26 +63,34 @@ function clipPanel(ctx, rect) {
   ctx.clip();
 }
 
-function drawPanelCaption(ctx, rect, cap, mode, index, tagTop) {
+function drawPanelCaption(ctx, rect, cap, mode, index, tagFrac) {
   const { x, y, w, h } = rect;
   if (mode === 'role' || mode === 'cast') {
     const role = cap.role || ROLES[index % ROLES.length];
-    // If the tag would land under the giant title, pin it to the top of
-    // the panel instead (the hero of the title-over-art layouts).
-    const ty = tagTop ? y + h * 0.14 : y + h * 0.82;
+    // v3: the podium label — a SMALL black pill pinned to the panel's
+    // bottom-left corner, white uppercase text, thin gold edge. The v2
+    // pill was a giant cream sticker centred on the photo; it read as a
+    // UI element pasted over the art and cost us games.
+    const size = Math.max(9, Math.min(h * 0.048, w * 0.052));
+    const pillH = size * 1.7;
+    const pad = Math.max(6, w * 0.03);
     ctx.save();
-    ctx.translate(x + w * 0.5, ty);
-    ctx.rotate(-0.02);
-    const size = Math.max(9, Math.min(h * 0.07, w * 0.10));
     ctx.font = `${size}px 'Bebas Neue'`;
-    const tw = ctx.measureText(role).width + size * 1.4;
-    roundRect(ctx, -tw / 2, -size * 0.75, tw, size * 1.5, size * 0.2);
-    ctx.fillStyle = '#f5f0e6';
+    const tw = ctx.measureText(role).width + size * 1.6;
+    // Bottom-left by default; panels a pop-out hero overlaps (the right
+    // column of Pop-Out Hero) pin the pill to the bottom-right instead.
+    const px = rect.tag === 'right' ? x + w - pad - tw : x + pad;
+    const py = y + h * tagFrac - pillH / 2;
+    roundRect(ctx, px, py, tw, pillH, pillH * 0.28);
+    ctx.fillStyle = 'rgba(5,2,12,0.92)';
     ctx.fill();
-    ctx.fillStyle = '#12041f';
-    ctx.textAlign = 'center';
+    ctx.strokeStyle = 'rgba(255,210,63,0.85)';
+    ctx.lineWidth = Math.max(1, pillH * 0.06);
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(role, 0, size * 0.05);
+    ctx.fillText(role, px + size * 0.8, py + pillH / 2 + size * 0.05);
     ctx.restore();
     return;
   }
@@ -147,23 +155,44 @@ export function renderCover(canvas, state) {
     const zoom = panned ? (slot.zoom || 1) : (rect.zoom || 1);
     const ox = panned ? (slot.ox || 0) : (rect.ox || 0);
     const oy = panned ? (slot.oy || 0) : (rect.oy || 0);
-    const tagTop = (() => {
-      // A role tag is a pill of tagH height centred at 0.82 of the panel.
-      // Move it to the panel top when its span would sit under the giant
-      // title; a tag centred on the cover also keeps clear of the script
-      // subtitle below the title. Side tags never reach the subtitle, so
-      // they only avoid the title itself.
-      const tagSize = Math.max(9, Math.min(rect.h * 0.07, rect.w * 0.10));
-      const tagH = tagSize * 1.5;
-      const tagCy = rect.y + rect.h * 0.82;
-      const titleBot = titleBox.y + titleBox.h;
-      if ((tagCy - tagH / 2) < titleBot && (tagCy + tagH / 2) > titleBox.y) return true;
-      const cx = rect.x + rect.w / 2;
-      if (cx > 0.35 * W && cx < 0.65 * W) {
-        const subY = (chrome.subY ?? 0.872) * H;
-        return (tagCy - tagH / 2) < subY + H * 0.035 && (tagCy + tagH / 2) > subY - H * 0.035;
+    // v3: the role tag is a small black pill at the panel's bottom-left
+    // (fraction 0.90 of the panel height). Try 0.90 first, then the upper
+    // area (0.16), then the top (0.10), then the very bottom (0.97) — the
+    // first spot whose span clears the title box, the script subtitle and
+    // the quote bar, using the tag's real width and the subtitle's
+    // estimated width, and stays inside the panel. The old boolean only
+    // moved tags to the top, which put the Slanted layout's THE FIXER tag
+    // on top of the title glyphs.
+    const tagFrac = (() => {
+      const tagSize = Math.max(9, Math.min(rect.h * 0.048, rect.w * 0.052));
+      const tagH = tagSize * 1.7;
+      const role = (cap.role || ROLES[i % ROLES.length] || '');
+      const tw = tagSize * (0.62 * role.length + 1.6);
+      const pad = Math.max(6, rect.w * 0.03);
+      const tagL = rect.tag === 'right' ? rect.x + rect.w - pad - tw : rect.x + pad;
+      const tagR = tagL + tw;
+      const subY = (chrome.subY ?? 0.872) * H;
+      const subHalfH = H * 0.022;
+      const subHalfW = Math.min(0.32, (state.subtitle || '').length * 0.013) * W;
+      const subL = 0.5 * W - subHalfW;
+      const subR = 0.5 * W + subHalfW;
+      const quoteTop = 0.018 * H;
+      const quoteBot = 0.056 * H;
+      const quoteL = 0.03 * W;
+      const quoteR = 0.71 * W;
+      const clear = (cy) => {
+        const t = cy - tagH / 2 - 2;
+        const b = cy + tagH / 2 + 2;
+        if (t < rect.y + 2 || b > rect.y + rect.h - 2) return false;
+        if (b > titleBox.y && t < titleBox.y + titleBox.h) return false;
+        if (tagR > subL && tagL < subR && b > subY - subHalfH && t < subY + subHalfH) return false;
+        if (tagR > quoteL && tagL < quoteR && b > quoteTop && t < quoteBot) return false;
+        return true;
+      };
+      for (const frac of [0.90, 0.16, 0.10, 0.97]) {
+        if (clear(rect.y + rect.h * frac)) return frac;
       }
-      return false;
+      return 0.90;
     })();
     ctx.save();
     if (rect.pop || rect.shadow) {
@@ -196,7 +225,14 @@ export function renderCover(canvas, state) {
       drawPhotoCover(ctx, photo && photo.img, { x: 0, y: 0, w: rect.w, h: rect.h }, zoom, ox, oy);
       applyGrade(ctx, { x: 0, y: 0, w: rect.w, h: rect.h }, grade);
       if (state.ink) applyInk(ctx, { x: 0, y: 0, w: rect.w, h: rect.h });
-      drawPanelCaption(ctx, { x: 0, y: 0, w: rect.w, h: rect.h }, cap, state.captionMode, i, tagTop);
+      drawPanelCaption(ctx, { x: 0, y: 0, w: rect.w, h: rect.h, tag: rect.tag }, cap, state.captionMode, i, tagFrac);
+      // v3: slanted panels wear a thin gold edge, like the podium frames.
+      // The pop-out hero stays frameless so it keeps breaking out.
+      if (rect.shadow) {
+        ctx.strokeStyle = '#e8b93e';
+        ctx.lineWidth = Math.max(2, W * 0.003);
+        ctx.strokeRect(0, 0, rect.w, rect.h);
+      }
       ctx.restore();
       continue;
     }
@@ -204,11 +240,13 @@ export function renderCover(canvas, state) {
     drawPhotoCover(ctx, photo && photo.img, rect, zoom, ox, oy);
     applyGrade(ctx, rect, grade);
     if (state.ink) applyInk(ctx, rect);
-    drawPanelCaption(ctx, rect, cap, state.captionMode, i, tagTop);
+    drawPanelCaption(ctx, rect, cap, state.captionMode, i, tagFrac);
     ctx.restore();
-    // Cream poster frame around the panel.
+    // v3: thin gold poster frame around the panel — the podium covers
+    // frame every plate in gold; the old cream frame read as a plain
+    // white grid gap.
     ctx.save();
-    ctx.strokeStyle = '#f5ead6';
+    ctx.strokeStyle = '#e8b93e';
     ctx.lineWidth = Math.max(2, W * 0.0035);
     if (rect.slant) {
       const s = rect.slant * rect.w;

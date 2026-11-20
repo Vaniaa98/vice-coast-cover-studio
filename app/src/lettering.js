@@ -51,6 +51,16 @@ function fitSize(ctx, text, maxWidth, start, family, weight = '') {
 }
 
 export const TITLE_STYLES = {
+  // v3 default: the podium look — hard-edged sunset bands (yellow, orange,
+  // pink, purple) like the PALM FEVER title, a thick white outline and a
+  // purple drop shadow. The gradient stops share edges, so the bands are
+  // crisp stripes instead of a smooth blend.
+  striped: {
+    name: 'Striped',
+    stops: [[0, '#ffe259'], [0.26, '#ffe259'], [0.26, '#ff9a3d'], [0.48, '#ff9a3d'], [0.48, '#ff2d78'], [0.72, '#ff2d78'], [0.72, '#b967ff'], [1, '#b967ff']],
+    shadow: '#7b1fa2',
+    outline: '#ffffff',
+  },
   sunset: {
     name: 'Sunset',
     stops: [[0, '#ffe259'], [0.45, '#ff7a3d'], [1, '#ff2d78']],
@@ -90,7 +100,7 @@ export function drawTitle(ctx, text, box, styleId) {
   ctx.textBaseline = 'middle';
   ctx.font = `${size}px Anton`;
   ctx.lineJoin = 'round';
-  ctx.strokeStyle = '#0a0a12';
+  ctx.strokeStyle = style.outline || '#0a0a12';
   ctx.lineWidth = Math.max(3, size * 0.11);
   ctx.shadowColor = style.shadow;
   ctx.shadowBlur = size * 0.22;

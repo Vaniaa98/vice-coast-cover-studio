@@ -5,7 +5,7 @@
 // desktop browser loads offline (app/index.html and its ES modules, no
 // library and no network request): a cover maker with twelve multi-panel
 // layouts, six sunset/neon grades, original OFL lettering and three-size PNG
-// export. Its eight sample photos (app/samples/) were made with an image
+// export. Its twelve sample photos (app/samples/) were made with an image
 // model for this entry and are free to use.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.

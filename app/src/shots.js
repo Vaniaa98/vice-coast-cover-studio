@@ -5,7 +5,7 @@
 // window.__shotReady is set once the cover is painted.
 
 import { defaultState, SAMPLE_PHOTOS, SIZES } from './editor.js';
-import { CAPTIONS, ROLES, DEFAULT_PHOTOS, layoutById } from './layouts.js';
+import { CAPTIONS, ROLES, PHOTO_ROLES, DEFAULT_PHOTOS, layoutById } from './layouts.js';
 import { renderCover } from './cover.js';
 import { loadImage } from './editor.js';
 
@@ -18,7 +18,7 @@ export async function runShot(shot, query, editor) {
   const state = defaultState();
   state.layout = param(query, 'layout', 'title-over-art');
   state.grade = param(query, 'grade', 'sunset');
-  state.titleStyle = param(query, 'titleStyle', 'sunset');
+  state.titleStyle = param(query, 'titleStyle', 'striped');
   state.title = param(query, 'title', 'VICE COAST');
   state.subtitle = param(query, 'subtitle', 'Neon Tide');
   state.quote = param(query, 'quote', 'A FEVER DREAM IN NEON');
@@ -44,13 +44,27 @@ export async function runShot(shot, query, editor) {
     }
   }
   state.photos = photos;
-  state.panels = CAPTIONS.map((c, i) => ({
-    photo: DEFAULT_PHOTOS[i % DEFAULT_PHOTOS.length] % Math.max(1, photos.length),
-    zoom: 1,
-    ox: 0,
-    oy: 0,
-    caption: { ...c, role: ROLES[i % ROLES.length] },
-  }));
+  // v3: a shot may pin its own photo per panel (?photos=0,8,11,7,1) so
+  // each cover shows a different slice of the cast; otherwise the
+  // default cast order applies.
+  const photoList = (() => {
+    const p = query.get('photos');
+    if (!p) return null;
+    const idx = p.split(',').map((s) => Number(s)).filter((n) => Number.isFinite(n) && n >= 0);
+    return idx.length ? idx : null;
+  })();
+  const photoOrder = photoList || DEFAULT_PHOTOS;
+  state.panels = CAPTIONS.map((c, i) => {
+    const photoIdx = photoOrder[i % photoOrder.length] % Math.max(1, photos.length);
+    return {
+      photo: photoIdx,
+      zoom: 1,
+      ox: 0,
+      oy: 0,
+      // v3: the role names the person in the photo, not the panel slot.
+      caption: { ...c, role: PHOTO_ROLES[photoIdx] || ROLES[i % ROLES.length] },
+    };
+  });
 
   if (shot === 'cover') {
     document.body.classList.add('shot-cover');

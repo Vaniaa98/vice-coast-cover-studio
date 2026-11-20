@@ -8,7 +8,7 @@ An offline web app that turns your photos and a caption into GTA-style cover art
 
 ## How it works
 
-1. **Photos** — pick from the eight built-in Vice City sample scenes, or drop in your own photos. Click a photo to put it in the selected panel, or drag it straight onto the cover.
+1. **Photos** — pick from the twelve built-in Vice City sample scenes, or drop in your own photos. Click a photo to put it in the selected panel, or drag it straight onto the cover.
 2. **Layout** — twelve multi-panel layouts: Title Over Art (giant title overlapping the photos, quote on top), Pop-Out Hero (the hero breaks out of the grid), Slanted Panels (tilted, overlapping plates), Hero + Grid, Whole Cast (9 panels), Hero + Three, Full Bleed, Tilted Snapshot, Slashed Comic, Six-Panel Hero, Story Strip, Duo Split.
 3. **Grade** — six sunset/neon gradient-map grades (Sunset, Neon Coast, Vice Nights, Heat Wave, Chrome Dawn, Palm Noir), all skin-safe, plus poster ink, halftone title block and film grain.
 4. **Lettering** — a giant gradient block title (Sunset / Chrome / Neon styles) with a neon script subtitle, a five-star press quote bar, and the full badge set: WANTED stars, EST. seal, VOL. ticket, COLLECTOR'S EDITION ribbon, ORIGINAL starburst — plus the palm-strip tagline, footer microcopy and barcode.
@@ -27,7 +27,7 @@ No build step, no network request: every script, image and font is a file under 
 
 ## Originality
 
-All art is original — no Rockstar Games logo, wordmark, official artwork, character or font. The display fonts are vendored under `app/fonts/` under the SIL Open Font License (see `app/fonts/OFL.txt`): Anton, Bebas Neue, Pacifico. The eight sample photos were made with an image model for this entry.
+All art is original — no Rockstar Games logo, wordmark, official artwork, character or font. The display fonts are vendored under `app/fonts/` under the SIL Open Font License (see `app/fonts/OFL.txt`): Anton, Bebas Neue, Pacifico. The twelve sample photos were made with an image model for this entry.
 
 ## Entry
 

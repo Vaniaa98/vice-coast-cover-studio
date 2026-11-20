@@ -24,9 +24,21 @@ export const ROLES = [
   'THE INSIDER', 'THE COURIER', 'THE CLOSER', 'THE ANGLER',
 ];
 
-// Default photo for each panel slot: the hero always opens on the boulevard
-// convertible, the rest cycle the sample set.
-export const DEFAULT_PHOTOS = [0, 3, 2, 6, 1, 4, 5, 7, 0];
+// The role a photo plays in cast mode — the role follows the PHOTO, not
+// the panel slot, so the label always names the person in the picture.
+// (v2 labelled by panel index: the blonde navigator was "THE FIXER" and
+// the mechanic was "THE CAPTAIN".)
+export const PHOTO_ROLES = {
+  0: 'THE DRIVER', 1: 'THE FIXER', 2: 'THE CAPTAIN', 3: 'THE LOOKOUT',
+  4: 'THE RIDER', 5: 'THE INSIDER', 6: 'THE CLOSER', 7: 'THE ANGLER',
+  8: 'THE BOSS', 9: 'THE MECHANIC', 10: 'THE NAVIGATOR', 11: 'THE COURIER',
+};
+// convertible, then the cast — boss, mechanic, navigator — then the gas
+// station (the one scenery panel that still carries a figure). v3: faces,
+// not landscapes; the pier angler and the courier fill the later slots.
+// Indices: 0 boulevard, 1 gas, 2 marina, 3 tower, 4 car, 5 street,
+// 6 coast, 7 pier, 8 boss, 9 mechanic, 10 navigator, 11 courier.
+export const DEFAULT_PHOTOS = [0, 8, 9, 10, 1, 11, 7, 5, 0];
 
 function r(x, y, w, h, extra = {}) {
   return { x, y, w, h, ...extra };
@@ -77,8 +89,11 @@ export const LAYOUTS = [
         }),
         r(0, 0, 0.30 * W, 0.40 * H),
         r(0, 0.40 * H, 0.30 * W, 0.40 * H),
-        r(0.70 * W, 0, 0.30 * W, 0.40 * H),
-        r(0.70 * W, 0.40 * H, 0.30 * W, 0.40 * H),
+        // v3: the pop-out hero overlaps the right column, so the right
+        // panels' tags sit at their bottom-RIGHT — a bottom-left tag there
+        // is half hidden behind the hero.
+        r(0.70 * W, 0, 0.30 * W, 0.40 * H, { tag: 'right' }),
+        r(0.70 * W, 0.40 * H, 0.30 * W, 0.40 * H, { tag: 'right' }),
       ];
     },
   },
@@ -89,8 +104,10 @@ export const LAYOUTS = [
     chrome: OVER_ART_CHROME,
     panels(W, H) {
       return [
+        // v3: zoomed slightly and panned down (oy +0.35) so the hero's
+        // face sits clear above the title instead of half behind it.
         r(0.01 * W, 0.01 * H, 0.46 * W, 0.78 * H, {
-          rot: -2.5, frame: 'none', shadow: true, ox: -0.6, oy: -0.1,
+          rot: -2.5, frame: 'none', shadow: true, ox: -0.6, oy: 0.35, zoom: 1.1,
         }),
         r(0.45 * W, 0.0, 0.26 * W, 0.38 * H, { rot: 2, frame: 'none', shadow: true }),
         r(0.72 * W, 0.02 * H, 0.27 * W, 0.38 * H, { rot: -1.5, frame: 'none', shadow: true }),

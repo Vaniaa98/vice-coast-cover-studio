@@ -5,7 +5,7 @@
 // selected post size, so what you see is exactly what the PNG will be.
 
 import { renderCover } from './cover.js';
-import { LAYOUTS, CAPTIONS, ROLES, DEFAULT_PHOTOS, layoutById } from './layouts.js';
+import { LAYOUTS, CAPTIONS, ROLES, PHOTO_ROLES, DEFAULT_PHOTOS, layoutById } from './layouts.js';
 import { GRADES } from './grades.js';
 import { TITLE_STYLES } from './lettering.js';
 import { exportPNG, exportAllSizes } from './export.js';
@@ -19,6 +19,12 @@ export const SAMPLE_PHOTOS = [
   { file: 'street.jpg', name: 'Neon Street' },
   { file: 'coast.jpg', name: 'Coastal Road' },
   { file: 'pier.jpg', name: 'Pier' },
+  // v3: the cast — close-up character portraits, so the default cover is
+  // faces, not scenery. The podium covers are character collages.
+  { file: 'boss.jpg', name: 'The Boss' },
+  { file: 'mechanic.jpg', name: 'The Mechanic' },
+  { file: 'navigator.jpg', name: 'The Navigator' },
+  { file: 'courier.jpg', name: 'The Courier' },
 ];
 
 export const SIZES = {
@@ -31,7 +37,7 @@ export function defaultState() {
   return {
     layout: 'title-over-art',
     grade: 'sunset',
-    titleStyle: 'sunset',
+    titleStyle: 'striped',
     title: 'VICE COAST',
     subtitle: 'Neon Tide',
     quote: 'A FEVER DREAM IN NEON',
@@ -97,13 +103,17 @@ export class Editor {
       }
     }
     this.state.photos = loaded;
-    this.state.panels = CAPTIONS.map((c, i) => ({
-      photo: DEFAULT_PHOTOS[i % DEFAULT_PHOTOS.length] % Math.max(1, loaded.length),
-      zoom: 1,
-      ox: 0,
-      oy: 0,
-      caption: { ...c, role: ROLES[i % ROLES.length] },
-    }));
+    this.state.panels = CAPTIONS.map((c, i) => {
+      const photoIdx = DEFAULT_PHOTOS[i % DEFAULT_PHOTOS.length] % Math.max(1, loaded.length);
+      return {
+        photo: photoIdx,
+        zoom: 1,
+        ox: 0,
+        oy: 0,
+        // v3: the role names the person in the photo, not the panel slot.
+        caption: { ...c, role: PHOTO_ROLES[photoIdx] || ROLES[i % ROLES.length] },
+      };
+    });
   }
 
   setStatus(text) {
@@ -257,6 +267,7 @@ export class Editor {
       const n = this.state.photos.length || 1;
       this.state.panels.forEach((slot, i) => {
         slot.photo = i % n;
+        if (PHOTO_ROLES[slot.photo]) slot.caption.role = PHOTO_ROLES[slot.photo];
       });
       this.render();
       this.setStatus('Filled every panel from your photos.');
@@ -302,7 +313,10 @@ export class Editor {
       });
       thumb.appendChild(img);
       thumb.addEventListener('click', () => {
-        this.currentSlot().photo = i;
+        const slot = this.currentSlot();
+        slot.photo = i;
+        // v3: the role follows the photo — the label names the person shown.
+        if (PHOTO_ROLES[i]) slot.caption.role = PHOTO_ROLES[i];
         this.render();
         this.setStatus(`Panel ${this.selected + 1} now uses “${photo.name}”.`);
       });
@@ -408,6 +422,7 @@ export class Editor {
       if (i < 0) return;
       this.selected = i;
       this.state.panels[i].photo = idx;
+      if (PHOTO_ROLES[idx]) this.state.panels[i].caption.role = PHOTO_ROLES[idx];
       this.render();
     });
   }
