@@ -9,12 +9,12 @@ An offline web app that turns your photos and a caption into GTA-style cover art
 ## How it works
 
 1. **Photos** — pick from the eight built-in Vice City sample scenes, or drop in your own photos. Click a photo to put it in the selected panel, or drag it straight onto the cover.
-2. **Layout** — nine multi-panel layouts: Hero + Grid, Whole Cast (9 panels), Hero + Three, Full Bleed, Tilted Snapshot, Slashed Comic, Six-Panel Hero, Story Strip, Duo Split.
+2. **Layout** — twelve multi-panel layouts: Title Over Art (giant title overlapping the photos, quote on top), Pop-Out Hero (the hero breaks out of the grid), Slanted Panels (tilted, overlapping plates), Hero + Grid, Whole Cast (9 panels), Hero + Three, Full Bleed, Tilted Snapshot, Slashed Comic, Six-Panel Hero, Story Strip, Duo Split.
 3. **Grade** — six sunset/neon gradient-map grades (Sunset, Neon Coast, Vice Nights, Heat Wave, Chrome Dawn, Palm Noir), all skin-safe, plus poster ink, halftone title block and film grain.
 4. **Lettering** — a giant gradient block title (Sunset / Chrome / Neon styles) with a neon script subtitle, a five-star press quote bar, and the full badge set: WANTED stars, EST. seal, VOL. ticket, COLLECTOR'S EDITION ribbon, ORIGINAL starburst — plus the palm-strip tagline, footer microcopy and barcode.
 5. **Export** — one click per size, or all three at once: **1080 × 1080, 1080 × 1350, 1920 × 1080** PNG.
 
-Every panel carries its own caption ("PLACE / TIME — flavour") or a character-role label (THE DRIVER, THE ANGLER, …). Click a panel to select it, drag the photo inside it to reposition, scroll to zoom — or use the sliders.
+Every panel carries its own caption ("PLACE / TIME — flavour") or a character-role label (THE DRIVER, THE BOSS, THE CAPTAIN, …). In cast mode the billing block names the cast — "A VICE COAST PICTURE · STARRING THE DRIVER · THE BOSS · THE CAPTAIN" — like a movie poster. Click a panel to select it, drag the photo inside it to reposition, scroll to zoom — or use the sliders.
 
 ## Run it
 

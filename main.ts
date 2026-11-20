@@ -3,7 +3,7 @@
 // /output and writes /output/dossier.json, the summary the judge reads, with
 // the vendored make.fun library. The app itself is plain static files a
 // desktop browser loads offline (app/index.html and its ES modules, no
-// library and no network request): a cover maker with nine multi-panel
+// library and no network request): a cover maker with twelve multi-panel
 // layouts, six sunset/neon grades, original OFL lettering and three-size PNG
 // export. Its eight sample photos (app/samples/) were made with an image
 // model for this entry and are free to use.

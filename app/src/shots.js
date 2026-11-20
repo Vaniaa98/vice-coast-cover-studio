@@ -5,7 +5,7 @@
 // window.__shotReady is set once the cover is painted.
 
 import { defaultState, SAMPLE_PHOTOS, SIZES } from './editor.js';
-import { CAPTIONS, ROLES, DEFAULT_PHOTOS } from './layouts.js';
+import { CAPTIONS, ROLES, DEFAULT_PHOTOS, layoutById } from './layouts.js';
 import { renderCover } from './cover.js';
 import { loadImage } from './editor.js';
 
@@ -16,7 +16,7 @@ function param(query, key, fallback) {
 
 export async function runShot(shot, query, editor) {
   const state = defaultState();
-  state.layout = param(query, 'layout', 'hero-grid');
+  state.layout = param(query, 'layout', 'title-over-art');
   state.grade = param(query, 'grade', 'sunset');
   state.titleStyle = param(query, 'titleStyle', 'sunset');
   state.title = param(query, 'title', 'VICE COAST');
@@ -24,7 +24,7 @@ export async function runShot(shot, query, editor) {
   state.quote = param(query, 'quote', 'A FEVER DREAM IN NEON');
   state.quoteSource = param(query, 'quoteSource', 'THE COAST HERALD');
   state.tagline = param(query, 'tagline', 'ONE COAST · NO RULES · COMING SOON');
-  state.captionMode = param(query, 'captionMode', 'place');
+  state.captionMode = param(query, 'captionMode', 'cast');
   state.badgeLabel = param(query, 'badgeLabel', 'WANTED');
   state.vol = param(query, 'vol', 'VOL. 06');
   state.ink = query.get('ink') === '1';
@@ -60,9 +60,22 @@ export async function runShot(shot, query, editor) {
     canvas.height = size.h;
     renderCover(canvas, state);
   } else {
-    // Editor shot: reuse the live editor with this fixed state.
+    // Editor shot: reuse the live editor with this fixed state, and sync
+    // the visible controls (caption mode, size, active layout chip) so the
+    // screenshot shows the shot's state, not the editor defaults.
     editor.state = state;
     editor.selected = 0;
+    const capSel = document.getElementById('captionMode');
+    if (capSel) capSel.value = state.captionMode;
+    const sizeSel = document.getElementById('sizeSelect');
+    if (sizeSel) sizeSel.value = state.size;
+    const layoutList = document.getElementById('layoutList');
+    const layoutName = layoutById(state.layout).name;
+    if (layoutList) {
+      for (const b of layoutList.children) {
+        b.classList.toggle('active', b.textContent === layoutName);
+      }
+    }
     editor.render();
   }
   await document.fonts.ready;

@@ -29,7 +29,7 @@ export const SIZES = {
 
 export function defaultState() {
   return {
-    layout: 'hero-grid',
+    layout: 'title-over-art',
     grade: 'sunset',
     titleStyle: 'sunset',
     title: 'VICE COAST',
@@ -37,7 +37,7 @@ export function defaultState() {
     quote: 'A FEVER DREAM IN NEON',
     quoteSource: 'THE COAST HERALD',
     tagline: 'ONE COAST · NO RULES · COMING SOON',
-    captionMode: 'place',
+    captionMode: 'cast',
     badges: { wanted: true, seal: true, vol: true, ribbon: true, starburst: true, quote: true },
     badgeLabel: 'WANTED',
     vol: 'VOL. 06',
